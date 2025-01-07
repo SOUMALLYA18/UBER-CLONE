@@ -3,13 +3,14 @@ const { validateUser } = require("../utils/valiadation");
 const { hashPassword, comparePassword } = require("../utils/auth");
 const { validateLogin } = require("../utils/validateLogin");
 const userService = require("../services/userService");
+const blacklistToken = require("../models/blacklistToken");
 
 module.exports.registerUser = async (req, res, next) => {
   try {
     const { firstname, lastname, password, email } = req.body;
 
-    const existinguser = await userModel.findOne({ email });
-    if (existinguser) {
+    const existingUser = await userModel.findOne({ email });
+    if (existingUser) {
       return res.status(400).json({ error: "Email is already taken" });
     }
     const fullname = { firstname, lastname };
@@ -56,10 +57,28 @@ module.exports.loginUser = async (req, res, next) => {
       return res.status(401).json({ error: "Invalid email or password" });
     }
     const token = user.generateAuthToken();
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
     res.status(200).json({ token, user });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
     next(error);
   }
+};
+
+module.exports.getUserProfile = async (req, res, next) => {
+  res.status(200).json(req.user);
+};
+
+module.exports.logoutUser = async (req, res, next) => {
+  res.clearCookie("token");
+  const token = req.cookies?.token || req.headers.authorization.split(" ")[1];
+  await blacklistToken.create({ token });
+  await res.status(200).json({ message: "Logged out successfully" });
 };
