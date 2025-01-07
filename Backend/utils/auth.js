@@ -17,8 +17,4 @@ const comparePassword = async (inputPassword, hashedPassword) => {
   }
 };
 
-const generateAuthToken = (userId) => {
-  return jwt.sign({ _id: userId }, process.env.JWT_SECRET, { expiresIn: "1h" });
-};
-
-module.exports = { hashPassword, comparePassword, generateAuthToken };
+module.exports = { hashPassword, comparePassword };
