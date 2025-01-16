@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import uberLogo from "/images/Uber_logo.png";
+import uberLogo from "../../public/images/uber-driver.svg";
 import { Link } from "react-router-dom";
 
 const captainLogin = () => {
@@ -63,7 +63,7 @@ const captainLogin = () => {
       <div>
         <Link
           to="/login"
-          className="bg-[#1FBAD6] flex items-center justify-center text-white font-semibold mb-5 rounded px-4 py-2 w-full text-lg "
+          className="bg-[#d5622d] flex items-center justify-center text-white font-semibold mb-5 rounded px-4 py-2 w-full text-lg "
         >
           Sign in as User
         </Link>
