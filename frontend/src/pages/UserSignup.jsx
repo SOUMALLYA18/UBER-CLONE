@@ -9,38 +9,56 @@ const UserSignup = () => {
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [userData, setUserData] = useState({});
+  const [errors, setErrors] = useState({}); // State to store errors for each field
 
   const navigate = useNavigate();
+  const { setUser } = useContext(userDataContext);
 
-  const { user, setUser } = useContext(userDataContext);
+  const validateInputs = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const newErrors = {};
+
+    if (!firstName.trim()) newErrors.firstName = "First name is required.";
+    if (!lastName.trim()) newErrors.lastName = "Last name is required.";
+    if (!emailRegex.test(email)) newErrors.email = "Invalid email address.";
+    if (password.length < 6)
+      newErrors.password = "Password must be at least 6 characters long.";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const submitHandler = async (e) => {
     e.preventDefault();
 
-    const newUser = {
-      email: email,
-      password: password,
-      firstname: firstName,
-      lastname: lastName,
-    };
+    if (!validateInputs()) return; // Stop if there are validation errors
 
-    const response = await axios.post(
-      `${import.meta.env.VITE_BASE_URL}/users/register`,
-      newUser
-    );
+    try {
+      const newUser = {
+        email,
+        password,
+        firstname: firstName,
+        lastname: lastName,
+      };
 
-    if (response.status === 201) {
-      const data = response.data;
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/users/register`,
+        newUser
+      );
 
-      setUser(data.user);
-      localStorage.setItem("token", data.token);
-      navigate("/home");
+      if (response.status === 201) {
+        const data = response.data;
+        setUser(data.user);
+        localStorage.setItem("token", data.token);
+        navigate("/home");
+      }
+    } catch (err) {
+      // Display backend error under the email field
+      setErrors((prev) => ({
+        ...prev,
+        email: err.response?.data?.message || "Something went wrong!",
+      }));
     }
-    setEmail("");
-    setPassword("");
-    setFirstName("");
-    setLastName("");
   };
 
   return (
@@ -50,51 +68,59 @@ const UserSignup = () => {
         <form onSubmit={submitHandler}>
           <h3 className="text-lg font-medium mb-2">What's your name?</h3>
           <div className="flex gap-4 mb-6">
-            <input
-              required
-              value={firstName}
-              onChange={(e) => {
-                setFirstName(e.target.value);
-              }}
-              className="bg-[#eeeeee] w-1/2  rounded px-4 py-2 border  text-base placeholder-text-base"
-              type="text"
-              placeholder="First name"
-            />
-            <input
-              required
-              value={lastName}
-              onChange={(e) => {
-                setLastName(e.target.value);
-              }}
-              className="bg-[#eeeeee]  rounded px-4 py-2 border w-1/2 text-base placeholder-text-base"
-              type="text"
-              placeholder="Last name"
-            />
+            <div className="w-1/2">
+              <input
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="bg-[#eeeeee] rounded px-4 py-2 border text-base placeholder-text-base w-full"
+                type="text"
+                placeholder="First name"
+              />
+              {errors.firstName && (
+                <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>
+              )}
+            </div>
+            <div className="w-1/2">
+              <input
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="bg-[#eeeeee] rounded px-4 py-2 border text-base placeholder-text-base w-full"
+                type="text"
+                placeholder="Last name"
+              />
+              {errors.lastName && (
+                <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>
+              )}
+            </div>
           </div>
 
           <h3 className="text-lg font-medium mb-2">What's your email?</h3>
-          <input
-            required
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-            }}
-            className="bg-[#eeeeee] mb-6 rounded px-4 py-2 border w-full text-lg placeholder-text-base"
-            type="email"
-            placeholder="email@example.com"
-          />
+          <div className="mb-6">
+            <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="bg-[#eeeeee] rounded px-4 py-2 border w-full text-lg placeholder-text-base"
+              type="email"
+              placeholder="email@example.com"
+            />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+            )}
+          </div>
 
           <h3 className="text-lg font-medium mb-2">What's your password?</h3>
-          <input
-            required
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-            }}
-            className="bg-[#eeeeee] mb-6 rounded px-4 py-2 border w-full text-lg placeholder-text-base"
-            type="password"
-            placeholder="password"
-          />
+          <div className="mb-6">
+            <input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="bg-[#eeeeee] rounded px-4 py-2 border w-full text-lg placeholder-text-base"
+              type="password"
+              placeholder="password"
+            />
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+            )}
+          </div>
 
           <button
             type="submit"
@@ -104,7 +130,7 @@ const UserSignup = () => {
           </button>
         </form>
         <p className="text-center">
-          Already have a account?{" "}
+          Already have an account?{" "}
           <Link to="/login" className="text-blue-600">
             Login
           </Link>
