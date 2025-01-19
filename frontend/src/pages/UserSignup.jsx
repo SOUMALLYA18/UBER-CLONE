@@ -31,7 +31,7 @@ const UserSignup = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
 
-    if (!validateInputs()) return; // Stop if there are validation errors
+    if (!validateInputs()) return;
 
     try {
       const newUser = {

@@ -8,6 +8,7 @@ import LocationSearchPanel from "../components/LocationSearchPanel";
 import Veichlepanel from "../components/Veichlepanel";
 import ConfirmRidePanel from "../components/ConfirmRidePanel";
 import LookingForDriver from "../components/LookingForDriver";
+import WaitingForDriver from "../components/WaitingForDriver";
 
 const Home = () => {
   const [pickup, setPickup] = useState("");
@@ -17,11 +18,14 @@ const Home = () => {
   const panelCloseRef = useRef(null);
   const confirmRidePanelRef = useRef(null);
   const veichleFoundRef = useRef(null);
+  const waitingForDriverRef = useRef(null);
 
   const veichlePanelRef = useRef(null);
   const [veichlePanel, setVeichlePanel] = useState(false);
   const [confirmRidePanel, setConfirmRidePanel] = useState(false);
   const [veichleFound, setveichleFound] = useState(false);
+  const [waitingForDriver, setWaitingForDriver] = useState(false);
+
   const submithandler = (e) => {
     e.preventDefault();
   };
@@ -59,6 +63,7 @@ const Home = () => {
       });
     }
   }, [confirmRidePanel]);
+
   useGSAP(() => {
     if (veichleFound) {
       gsap.to(veichleFoundRef.current, {
@@ -66,6 +71,18 @@ const Home = () => {
       });
     } else {
       gsap.to(veichleFoundRef.current, {
+        transform: "translateY(100%)",
+      });
+    }
+  }, [veichleFound]);
+
+  useGSAP(() => {
+    if (waitingForDriver) {
+      gsap.to(waitingForDriverRef.current, {
+        transform: "translateY(0)",
+      });
+    } else {
+      gsap.to(waitingForDriverRef.current, {
         transform: "translateY(100%)",
       });
     }
@@ -158,6 +175,12 @@ const Home = () => {
         className="fixed z-10 bottom-0 translate-y-full bg-white w-full px-3 py-8 pt-12"
       >
         <LookingForDriver />
+      </div>
+      <div
+        ref={waitingForDriverRef}
+        className="fixed z-10 bottom-0 translate-y-full  bg-white w-full px-3 py-8 pt-12"
+      >
+        <WaitingForDriver />
       </div>
     </div>
   );
