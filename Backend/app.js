@@ -6,6 +6,7 @@ const app = express();
 const cors = require("cors");
 const userRoutes = require("./routes/userRoutes");
 const captainRoutes = require("./routes/captainRoutes");
+const mapsRoutes = require("./routes/mapsRoutes");
 
 const connectToDB = require("./db/db");
 connectToDB();
@@ -21,5 +22,6 @@ app.get("/", (req, res) => {
 
 app.use("/users", userRoutes);
 app.use("/captains", captainRoutes);
+app.use("/maps", mapsRoutes);
 
 module.exports = app;
