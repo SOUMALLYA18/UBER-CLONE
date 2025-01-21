@@ -1,5 +1,6 @@
 const rideModel = require("../models/rideModel");
 const mapService = require("../services/mapsService");
+const crypto = require("crypto");
 
 module.exports.createRide = async ({
   user,
@@ -13,18 +14,30 @@ module.exports.createRide = async ({
 
   const fare = await getFare(pickup, destination, vehicleType);
 
- 
   const ride = await rideModel.create({
     user,
     pickup,
     destination,
+    otp: getOtp(4),
     fare: fare,
   });
 
   return ride;
 };
 
-const getFare = async (pickup, destination, vehicleType) => {
+const getOtp = (num) => {
+  function generateOtp(num) {
+    const min = Math.pow(10, num - 1);
+    const max = Math.pow(10, num) - 1;
+
+    const otp = crypto.randomInt(min, max + 1).toString();
+    return otp;
+  }
+
+  return generateOtp(num);
+};
+
+const getFare = async (pickup, destination) => {
   if (!pickup || !destination) {
     throw new Error("Pickup and Destination are required");
   }
@@ -53,15 +66,20 @@ const getFare = async (pickup, destination, vehicleType) => {
     moto: 1.5,
   };
 
-  if (!baseFare[vehicleType]) {
-    throw new Error("Invalid vehicle type");
+  const fares = {};
+
+  for (const vehicleType in baseFare) {
+    const fare = Math.round(
+      baseFare[vehicleType] +
+        (distanceTime.distance.value / 1000) * perKmRate[vehicleType] +
+        (distanceTime.duration.value / 60) * perMinuteRate[vehicleType]
+    );
+    fares[vehicleType] = fare;
   }
 
-  const fare = Math.round(
-    baseFare[vehicleType] +
-      (distanceTime.distance.value / 1000) * perKmRate[vehicleType] +
-      (distanceTime.duration.value / 60) * perMinuteRate[vehicleType]
-  );
-
-  return fare;
+  return fares;
 };
+
+module.exports.getFare = getFare;
+
+module.exports.getFare = getFare;

@@ -1,32 +1,40 @@
 import React from "react";
 
-const LocationSearchPanel = (props) => {
-  const locations = [
-    "Kyoto, Japan",
-    "Cape Town, South Africa",
-    "Reykjavik, Iceland",
-    "Machu Picchu, Peru",
-    "Santorini, Greece",
-  ];
+const LocationSearchPanel = ({
+  suggestions,
+  setVehiclePanel,
+  setPanelOpen,
+  setPickup,
+  setDestination,
+  activeField,
+}) => {
+  const handleSuggestionClick = (suggestion) => {
+    if (activeField === "pickup") {
+      setPickup(suggestion); // Update pickup value
+    } else if (activeField === "destination") {
+      setDestination(suggestion); // Update destination value
+    }
+    // setPanelOpen(false);
+  };
 
   return (
-    <div>
-      {locations.map((location, index) => (
-        <div
-          key={index}
-          onClick={() => {
-            props.setVeichlePanel(true);
-            props.setPanelOpen(false);
-          }}
-          key={index}
-          className="flex items-center justify-center gap-4 p-4 my-4 border-2 border-white active:border-black rounded-xl"
-        >
-          <h2 className="h-8 w-12 flex items-center justify-center font-semibold bg-[#eee] rounded-full">
-            <i className="ri-map-pin-fill"></i>
-          </h2>
-          <h4 className="font-medium">{location}</h4>
-        </div>
-      ))}
+    <div className="p-4">
+      {suggestions.length > 0 ? (
+        suggestions.map((elem, idx) => (
+          <div
+            key={idx}
+            onClick={() => handleSuggestionClick(elem)}
+            className="flex gap-4 border-2 p-3 border-gray-50 hover:border-black rounded-xl items-center my-2 justify-start cursor-pointer"
+          >
+            <h2 className="bg-[#eee] h-8 flex items-center justify-center w-12 rounded-full">
+              <i className="ri-map-pin-fill"></i>
+            </h2>
+            <h4 className="font-medium">{elem}</h4>
+          </div>
+        ))
+      ) : (
+        <p className="text-gray-500 text-center">No suggestions found.</p>
+      )}
     </div>
   );
 };

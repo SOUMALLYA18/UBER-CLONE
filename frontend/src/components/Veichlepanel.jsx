@@ -27,7 +27,7 @@ const Veichlepanel = (props) => {
         </div>
         <h2 className="text-xl font-semibold ">
           <i className="ri-money-rupee-circle-line"></i>
-          193.20
+          {props.fare.car}
         </h2>
       </div>
       <div
@@ -51,7 +51,7 @@ const Veichlepanel = (props) => {
         </div>
         <h2 className="text-xl font-semibold ">
           <i className="ri-money-rupee-circle-line"></i>
-          65
+          {props.fare.moto}
         </h2>
       </div>
       <div
@@ -72,7 +72,7 @@ const Veichlepanel = (props) => {
         </div>
         <h2 className="text-xl font-semibold ">
           <i className="ri-money-rupee-circle-line"></i>
-          120
+          {props.fare.auto}
         </h2>
       </div>
     </div>
