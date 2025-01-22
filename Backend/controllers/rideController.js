@@ -35,12 +35,23 @@ module.exports.getFare = async (req, res, next) => {
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
   }
+
   const { origin, destination } = value;
+
   try {
     const fare = await rideService.getFare(origin, destination);
     return res.status(200).json(fare);
   } catch (error) {
-    res
+    console.error("Error fetching fare:", error);
+    if (error.message === "No routes found") {
+      return res
+        .status(404)
+        .json({
+          error: "No routes found",
+          message: "No routes available between the selected locations",
+        });
+    }
+    return res
       .status(500)
       .json({ error: "Internal Server Error", message: error.message });
   }

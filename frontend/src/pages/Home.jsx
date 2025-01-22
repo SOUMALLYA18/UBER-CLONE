@@ -104,6 +104,43 @@ const Home = () => {
       alert("Please select both a pickup location and a destination.");
     }
   };
+  async function createRide(selectedVehicleType) {
+    // Validation: Ensure pickup, destination, and vehicle type are provided
+    if (!pickup || !destination || !selectedVehicleType) {
+      console.error(
+        "Please fill all the fields: pickup, destination, and vehicle type."
+      );
+      return;
+    }
+
+    const rideData = {
+      pickup,
+      destination,
+      vehicleType: selectedVehicleType,
+    };
+
+    console.log("Sending ride data:", rideData); // For debugging
+
+    try {
+      // Make an API request to create the ride
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/rides/create`,
+        rideData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`, // Use the stored JWT token
+          },
+        }
+      );
+
+      console.log("Ride created successfully:", response.data); // Handle successful response
+    } catch (error) {
+      console.error(
+        "Error creating ride:",
+        error.response ? error.response.data : error.message
+      ); // Handle error
+    }
+  }
 
   useGSAP(() => {
     if (panelOpen) {
@@ -262,9 +299,11 @@ const Home = () => {
         className="fixed z-10 bottom-0 translate-y-full bg-white w-full px-3 py-8 pt-12 "
       >
         <Veichlepanel
+          createRide={createRide}
           fare={fare}
           setConfirmRidePanel={setConfirmRidePanel}
           setVeichlePanel={setVeichlePanel}
+          setVehicleType={setVehicleType}
         />
       </div>
       <div
