@@ -105,11 +105,16 @@ const Home = () => {
     }
   };
   async function createRide(selectedVehicleType) {
-    // Validation: Ensure pickup, destination, and vehicle type are provided
     if (!pickup || !destination || !selectedVehicleType) {
       console.error(
         "Please fill all the fields: pickup, destination, and vehicle type."
       );
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("User is not authenticated. Please log in.");
       return;
     }
 
@@ -119,16 +124,13 @@ const Home = () => {
       vehicleType: selectedVehicleType,
     };
 
-    console.log("Sending ride data:", rideData); // For debugging
-
     try {
-      // Make an API request to create the ride
       const response = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/rides/create`,
         rideData,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // Use the stored JWT token
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -138,7 +140,7 @@ const Home = () => {
       console.error(
         "Error creating ride:",
         error.response ? error.response.data : error.message
-      ); // Handle error
+      );
     }
   }
 
@@ -299,7 +301,6 @@ const Home = () => {
         className="fixed z-10 bottom-0 translate-y-full bg-white w-full px-3 py-8 pt-12 "
       >
         <Veichlepanel
-          createRide={createRide}
           fare={fare}
           setConfirmRidePanel={setConfirmRidePanel}
           setVeichlePanel={setVeichlePanel}
@@ -311,6 +312,11 @@ const Home = () => {
         className="fixed z-10 bottom-0 translate-y-full bg-white w-full px-3 py-8 pt-12"
       >
         <ConfirmRidePanel
+          createRide={() => createRide(vehicleType)}
+          pickup={pickup}
+          fare={fare}
+          vehicleType={vehicleType}
+          destination={destination}
           setConfirmRidePanel={setConfirmRidePanel}
           setveichleFound={setveichleFound}
         />
@@ -319,7 +325,13 @@ const Home = () => {
         ref={veichleFoundRef}
         className="fixed z-10 bottom-0 translate-y-full bg-white w-full px-3 py-8 pt-12"
       >
-        <LookingForDriver />
+        <LookingForDriver
+          createRide={() => createRide(vehicleType)}
+          pickup={pickup}
+          destination={destination}
+          fare={fare}
+          vehicleType={vehicleType}
+        />
       </div>
       <div
         ref={waitingForDriverRef}

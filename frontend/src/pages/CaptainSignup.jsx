@@ -42,14 +42,11 @@ const CaptainSignup = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
 
-    console.log("Form submitted"); // Log when form is submitted
+    console.log("Form submitted"); // Add this to check if the handler is being called
 
     if (!validateInputs()) {
-      console.log("Validation failed", errors); // Log validation errors
       return;
     }
-
-    console.log("Validation passed"); // Log when validation passes
 
     try {
       const captainData = {
@@ -63,29 +60,27 @@ const CaptainSignup = () => {
         color: vehicleColor,
       };
 
-      console.log("Submitting data to server:", captainData); // Log data sent to server
+      console.log("Submitting data to server:", captainData); // Log before API request
 
       const response = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/captains/register`,
         captainData
       );
 
-      console.log("Server response:", response.data); // Log response from server
+      console.log("Server response:", response.data); // Log response
 
       if (response.status === 201) {
         const data = response.data;
+        console.log("Data received:", data); // Log the data you receive
         setCaptain(data.captain);
-        console.log("Captain data set in context:", data.captain); // Log captain data
         localStorage.setItem("token", data.token);
-        console.log("Token stored in localStorage:", data.token); // Log token
         navigate("/captain-home");
-        console.log("Navigation to /captain-home successful"); // Log navigation success
       }
     } catch (err) {
       console.error(
         "Error during registration:",
         err.response?.data || err.message
-      ); // Log backend error
+      );
       setErrors((prev) => ({
         ...prev,
         email: err.response?.data?.message || "Something went wrong!",

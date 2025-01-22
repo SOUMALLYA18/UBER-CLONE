@@ -7,7 +7,6 @@ const VehiclePanel = (props) => {
   const handleVehicleSelect = (vehicleType) => {
     props.setVehicleType(vehicleType);
     props.setConfirmRidePanel(true); // Open the confirm ride panel
-    props.createRide(vehicleType); // Pass the selected vehicle type to createRide function
   };
 
   return (

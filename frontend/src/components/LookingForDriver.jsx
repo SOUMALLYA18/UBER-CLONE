@@ -1,6 +1,6 @@
 import React from "react";
 import ubercarLogo from "/images/uber-car-logo.png";
-const LookingForDriver = () => {
+const LookingForDriver = (props) => {
   return (
     <div>
       <h3 className="text-2xl font-semibold mb-5 text-center">
@@ -13,26 +13,26 @@ const LookingForDriver = () => {
             <i className="text-lg ri-user-location-fill"></i>
 
             <div>
-              <h3 className="text-lg font-medium">562/11-A</h3>
-              <p className="text-sm -mt-1 text-gray-600">
-                Kankariya talab Ahemdabad
-              </p>
+              <h3 className="text-lg  font-semibold -mt-1 text-gray-600">
+                {props.pickup}
+              </h3>
             </div>
           </div>
           <div className="flex items-center gap-5 p-3 border-b-2">
             <i className=" text-lg ri-map-pin-2-fill"></i>
             <div>
-              <h3 className="text-lg font-medium">562/11-A</h3>
-              <p className="text-sm -mt-1 text-gray-600">
-                Kankariya talab Ahemdabad
-              </p>
+              <h3 className="text-lg font-semibold -mt-1 text-gray-600">
+                {props.destination}
+              </h3>
             </div>
           </div>
           <div className="flex items-center gap-5 p-3 ">
             <i className=" text-lg ri-money-rupee-circle-line"></i>
             <div>
-              <h3 className="text-lg font-medium">193.20</h3>
-              <p className="text-sm -mt-1 text-gray-600">Cash cash</p>
+              <h3 className="text-lg font-medium">
+                {props.fare[props.vehicleType]}
+              </h3>
+              <p className="text-sm -mt-1 text-gray-600">Cash </p>
             </div>
           </div>
         </div>
