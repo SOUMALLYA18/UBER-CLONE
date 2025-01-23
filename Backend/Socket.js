@@ -25,6 +25,39 @@ const initializeSocket = (server) => {
         console.log(`Captain  ${userId} is now connected `);
       }
     });
+    socket.on("update-location-captain", async (data) => {
+      const { userId, location } = data;
+
+      if (!location || !location.ltd || !location.lng) {
+        return socket.emit("error", { message: "Invalid location data" });
+      }
+
+      try {
+        const updatedCaptain = await captainModel.findByIdAndUpdate(
+          userId,
+          {
+            location: {
+              ltd: location.ltd,
+              lng: location.lng,
+            },
+          },
+          { new: true }
+        );
+
+        if (updatedCaptain) {
+          console.log(`Captain's location updated: ${updatedCaptain.location}`);
+          socket.emit("location-updated", {
+            message: "Location updated successfully",
+          });
+        } else {
+          console.log(`Captain with ID ${userId} not found.`);
+          socket.emit("error", { message: "Captain not found" });
+        }
+      } catch (error) {
+        console.error("Error updating captain location:", error);
+        socket.emit("error", { message: "Error updating location" });
+      }
+    });
 
     socket.on("disconnect", () => {
       console.log(`Socket disconnected: ${socket.id}`);
@@ -32,12 +65,12 @@ const initializeSocket = (server) => {
   });
 };
 
-const sendMessageToSocketId = (socketId, message) => {
+const sendMessageToSocketId = (socketId, messageObject) => {
   if (io) {
     const socket = io.sockets.sockets.get(socketId);
     if (socket) {
-      socket.emit("message", message);
-      console.log(`Message sent to ${socketId}: ${message}`);
+      socket.emit(messageObject.event, messageObject.data);
+      console.log(`Message sent to ${socketId}: ${messageObject}`);
     } else {
       console.log(`Socket with ID ${socketId} not found`);
     }

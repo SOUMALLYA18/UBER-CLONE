@@ -20,9 +20,58 @@ const CaptainHome = () => {
   const { captain } = useContext(CaptainDataContext);
 
   useEffect(() => {
+    // Emit the join event when the component mounts
     socket.emit("join", { userType: "captain", userId: captain._id });
-  }, []);
 
+    // Track the last location to avoid emitting unnecessary updates
+    let lastLocation = { ltd: 0, lng: 0 };
+
+    // Function to update the captain's location
+    const updateLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const locationData = {
+              userId: captain._id,
+              location: {
+                ltd: position.coords.latitude,
+                lng: position.coords.longitude,
+              },
+            };
+
+            // Check if the location has changed significantly
+            if (
+              Math.abs(lastLocation.ltd - locationData.location.ltd) > 0.0001 ||
+              Math.abs(lastLocation.lng - locationData.location.lng) > 0.0001
+            ) {
+              // Emit location update to the server
+              socket.emit("update-location-captain", locationData);
+              lastLocation = locationData.location; // Update the last location
+            }
+          },
+          (error) => {
+            console.error("Error fetching location:", error);
+          }
+        );
+      } else {
+        console.warn("Geolocation is not supported by this browser.");
+      }
+    };
+
+    // Call updateLocation initially and set up an interval for periodic updates
+    updateLocation(); // Initial location update
+    const locationInterval = setInterval(updateLocation, 10000); // Updates every 10 seconds
+
+    // Cleanup function to clear the interval and leave the socket
+    return () => {
+      clearInterval(locationInterval); // Clear the interval
+      socket.emit("leave", { userType: "captain", userId: captain._id }); // Notify the server of disconnection
+    };
+  }, [socket, captain._id]);
+
+  socket.on("new-ride", (data) => {
+    console.log(data);
+  });
   useGSAP(
     function () {
       if (ridePopupPanel) {

@@ -55,13 +55,13 @@ const captainSchema = new mongoose.Schema({
       enum: ["car", "motorcycle", "auto"],
       required: true,
     },
-    location: {
-      lat: {
-        type: Number,
-      },
-      lng: {
-        type: Number,
-      },
+  },
+  location: {
+    ltd: {
+      type: Number,
+    },
+    lng: {
+      type: Number,
     },
   },
 });
