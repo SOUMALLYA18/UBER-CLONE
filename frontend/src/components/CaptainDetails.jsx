@@ -1,17 +1,40 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import userLogo from "/images/useravatar.jpg";
 import { CaptainDataContext } from "../context/CaptainContext";
+import axios from "axios"; // Ensure axios is imported
 
 const CaptainDetails = () => {
-  const { captain } = useContext(CaptainDataContext);
-  console.log(captain);
+  const { captain, setCaptain } = useContext(CaptainDataContext);
+
+  useEffect(() => {
+    const fetchCaptainData = async () => {
+      try {
+        const token = localStorage.getItem("token"); // Retrieve token with the correct key
+        if (!token) {
+          return;
+        }
+
+        const response = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/captains/profile`, // or any endpoint that returns captain data
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        setCaptain(response.data);
+      } catch (error) {
+        console.error("Error fetching captain data:", error);
+      }
+    };
+
+    fetchCaptainData();
+  }, []);
 
   if (!captain) {
-    return <p>Failed to load captain details</p>;
+    return <p>Loading captain data...</p>;
   }
-
-  // Combine firstname and lastname to display the full name
-  const fullName = `${captain.firstname} ${captain.lastname}`;
 
   return (
     <div>
@@ -23,7 +46,9 @@ const CaptainDetails = () => {
             alt="User Avatar"
           />
           {/* Safely accessing captain's first name and last name */}
-          <h4 className="text-lg font-medium">{fullName}</h4>
+          <h4 className="text-lg font-medium capitalize">
+            {captain?.fullname?.firstname + " " + captain?.fullname?.lastname}
+          </h4>
         </div>
         <div>
           <h4 className="text-xl font-semibold">294.00</h4>

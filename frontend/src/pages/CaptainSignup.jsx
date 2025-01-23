@@ -73,6 +73,9 @@ const CaptainSignup = () => {
         const data = response.data;
         console.log("Data received:", data); // Log the data you receive
         setCaptain(data.captain);
+
+        console.log(setCaptain);
+        console.log("setCaptain called with:", data.captain);
         localStorage.setItem("token", data.token);
         navigate("/captain-home");
       }
