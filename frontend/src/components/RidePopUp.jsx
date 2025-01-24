@@ -19,7 +19,11 @@ const RidePopUp = (props) => {
             src={uberUserLogo}
             alt=""
           />
-          <h2 className="text-lg font-medium">Soumallya Mukherjee</h2>
+          <h2 className="text-lg font-medium">
+            {props.ride?.user.fullname.firstname +
+              " " +
+              props.ride?.user.fullname.lastname}
+          </h2>
         </div>
         <h5 className="text-lg font-semibold">2.2 km</h5>
       </div>
@@ -29,25 +33,23 @@ const RidePopUp = (props) => {
             <i className="text-lg ri-user-location-fill"></i>
 
             <div>
-              <h3 className="text-lg font-medium">562/11-A</h3>
-              <p className="text-sm -mt-1 text-gray-600">
-                Kankariya talab Ahemdabad
-              </p>
+              <h3 className="text-lg font-medium -mt-1 text-gray-600">
+                {props.ride?.pickup}
+              </h3>
             </div>
           </div>
           <div className="flex items-center gap-5 p-3 border-b-2">
             <i className=" text-lg ri-map-pin-2-fill"></i>
             <div>
-              <h3 className="text-lg font-medium">562/11-A</h3>
-              <p className="text-sm -mt-1 text-gray-600">
-                Kankariya talab Ahemdabad
-              </p>
+              <h3 className="text-lg -mt-1 font-medium text-gray-600">
+                {props.ride?.destination}
+              </h3>
             </div>
           </div>
           <div className="flex items-center gap-5 p-3 ">
             <i className=" text-lg ri-money-rupee-circle-line"></i>
             <div>
-              <h3 className="text-lg font-medium">193.20</h3>
+              <h3 className="text-lg font-medium">{props.ride?.fare}</h3>
               <p className="text-sm -mt-1 text-gray-600">Cash cash</p>
             </div>
           </div>
@@ -55,6 +57,7 @@ const RidePopUp = (props) => {
         <button
           onClick={() => {
             props.setConfirmRidePopupPanel(true);
+            props.confirmRide();
           }}
           className="w-full mt-2 bg-[#28A745] text-white font-semibold p-2 rounded-lg"
         >

@@ -40,6 +40,7 @@ const Home = () => {
     socket.emit("join", { userType: "user", userId: user._id });
   }, [user]);
 
+  socket.on("ride-confirmed", (ride) => setWaitingForDriver(true));
   const submithandler = (e) => {
     e.preventDefault();
   };
@@ -218,6 +219,21 @@ const Home = () => {
       });
     }
   }, [veichleFound]);
+  
+  useGSAP(
+    function () {
+      if (waitingForDriver) {
+        gsap.to(waitingForDriverRef.current, {
+          transform: "translateY(0)",
+        });
+      } else {
+        gsap.to(waitingForDriverRef.current, {
+          transform: "translateY(100%)",
+        });
+      }
+    },
+    [waitingForDriver]
+  );
   return (
     <div className="relative h-screen w-screen overflow-hidden ">
       <img
@@ -344,7 +360,12 @@ const Home = () => {
         ref={waitingForDriverRef}
         className="fixed z-10 bottom-0 translate-y-full  bg-white w-full px-3 py-8 pt-12"
       >
-        <WaitingForDriver />
+        <WaitingForDriver
+          ride={ride}
+          setVehicleFound={setveichleFound}
+          setWaitingForDriver={setWaitingForDriver}
+          waitingForDriver={waitingForDriver}
+        />
       </div>
     </div>
   );

@@ -8,7 +8,7 @@ const validateRequest = require("../utils/validateRequest");
 const getDistanceTimeSchema = require("../utils/schemas/getDistanceTimeSchemas");
 const { sendMessageToSocketId } = require("../Socket");
 const rideModel = require("../models/rideModel");
-
+const { confirmRideSchema } = require("../utils/schemas/confirmRideSchema");
 module.exports.createRide = async (req, res, next) => {
   const { errors, value: validatedData } = validateRequest(
     rideValidationSchema,
@@ -105,5 +105,32 @@ module.exports.getFare = async (req, res, next) => {
     return res
       .status(500)
       .json({ error: "Internal Server Error", message: error.message });
+  }
+};
+
+module.exports.confirmRide = async (req, res, next) => {
+  const { error } = confirmRideSchema.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+  const { rideId } = req.body;
+
+  try {
+    const ride = await rideService.confirmRide({
+      rideId,
+      captain: req.captain, // Ensure req.captain is set correctly
+    });
+
+    sendMessageToSocketId(ride.user.socketId, {
+      event: "ride-confirmed",
+      data: ride,
+    });
+
+    return res.status(200).json(ride);
+  } catch (err) {
+    console.error(err); // Log the actual error object
+    return res.status(500).json({ message: err.message });
   }
 };

@@ -1,6 +1,6 @@
 import React from "react";
 import ubercarLogo from "/images/uber-car-logo.png";
-const WaitingForDriver = () => {
+const WaitingForDriver = (props) => {
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -19,7 +19,7 @@ const WaitingForDriver = () => {
             <div>
               <h3 className="text-lg font-medium">562/11-A</h3>
               <p className="text-sm -mt-1 text-gray-600">
-                Kankariya talab Ahemdabad
+                {props.ride?.pickup}
               </p>
             </div>
           </div>
@@ -28,14 +28,14 @@ const WaitingForDriver = () => {
             <div>
               <h3 className="text-lg font-medium">562/11-A</h3>
               <p className="text-sm -mt-1 text-gray-600">
-                Kankariya talab Ahemdabad
+                {props.ride?.destination}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-5 p-3 ">
             <i className=" text-lg ri-money-rupee-circle-line"></i>
             <div>
-              <h3 className="text-lg font-medium">193.20</h3>
+              <h3 className="text-lg font-medium">{props.ride?.fare}</h3>
               <p className="text-sm -mt-1 text-gray-600">Cash cash</p>
             </div>
           </div>
