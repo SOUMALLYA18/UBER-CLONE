@@ -6,9 +6,14 @@ const WaitingForDriver = (props) => {
       <div className="flex items-center justify-between">
         <img className="h-16" src={ubercarLogo} alt="" />
         <div className="text-right">
-          <h2 className="text-lg font-medium">Test Driver</h2>
-          <h4 className="text-xl font-semibold -mt-1 -mb-1">WB04667890</h4>
+          <h2 className="text-lg font-medium">
+            {props.ride?.captain.fullname.firstname}
+          </h2>
+          <h4 className="text-xl font-semibold -mt-1 -mb-1">
+            {props.ride?.captain.vehicle.plate}
+          </h4>
           <p className="text-sm text-gray-600">Mruti suzuki</p>
+          <h1 className="text-lg font-semibold">{props.ride?.otp}</h1>
         </div>
       </div>
       <div className="flex gap-2 justify-between flex-col items-center">

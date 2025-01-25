@@ -1,6 +1,7 @@
 const rideModel = require("../models/rideModel");
 const mapService = require("../services/mapsService");
 const crypto = require("crypto");
+const { sendMessageToSocketId } = require("../Socket");
 
 module.exports.createRide = async ({
   user,
@@ -119,22 +120,101 @@ const getFare = async (pickup, destination) => {
 module.exports.getFare = getFare;
 
 module.exports.confirmRide = async ({ rideId, captain }) => {
-  if (!rideId) {
-    throw new Error("Ride is required");
+  if (!rideId || !captain) {
+    console.error("Missing rideId or captain data");
+    throw new Error("Ride ID or Captain data is missing");
   }
 
-  await rideModel.findOneAndUpdate(
-    { _id: rideId },
-    {
-      status: "accepted",
-      captain: captain._id,
-    }
-  );
+  try {
+    // Update the ride with the captain's ID and set the status to "accepted"
+    const ride = await rideModel.findOneAndUpdate(
+      { _id: rideId },
+      {
+        status: "accepted",
+        captain: captain._id,
+      },
+      { new: true }
+    );
 
-  const ride = await rideModel.findOne({ _id: rideId }).populate("user");
+    if (!ride) {
+      console.error("Ride not found for ID:", rideId);
+      throw new Error("Ride not found");
+    }
+
+    // Retrieve the updated ride and populate both 'user' and 'captain'
+    const populatedRide = await rideModel
+      .findOne({ _id: rideId })
+      .populate("user", "socketId")
+      .populate("captain")
+      .select("+otp");
+
+    if (!populatedRide) {
+      console.error("Failed to populate the ride");
+      throw new Error("Failed to populate the ride");
+    }
+
+    return populatedRide;
+  } catch (error) {
+    console.error("Error in confirmRide:", error.message);
+    throw error;
+  }
+};
+
+module.exports.startRide = async ({ rideId, otp, captain }) => {
+  console.log("Received parameters: rideId =", rideId, "otp =", otp);
+
+  if (!rideId || !otp) {
+    throw new Error("Ride ID and OTP are required");
+  }
+
+  const ride = await rideModel
+    .findOne({ _id: rideId })
+    .populate("user", "socketId")
+    .populate("captain", "socketId")
+    .select("+otp");
+
   if (!ride) {
     throw new Error("Ride not found");
   }
 
-  return ride;
+  console.log("Ride found:", ride);
+
+  if (ride.status !== "accepted") {
+    throw new Error("Ride not accepted");
+  }
+
+  if (ride.otp !== otp) {
+    throw new Error("Invalid OTP");
+  }
+
+  try {
+    const updatedRide = await rideModel.findOneAndUpdate(
+      { _id: rideId },
+      { status: "ongoing", captain: captain },
+      { new: true }
+    );
+
+    console.log("Updated ride:", updatedRide);
+
+    // Log and verify socketId before sending the message
+    const userSocketId = ride.user?.socketId;
+
+    console.log("User socketId:", userSocketId);
+
+    if (!userSocketId) {
+      console.error("User socketId is missing!");
+      return;
+    }
+
+    // Send a message to the user's socket
+    sendMessageToSocketId(userSocketId, {
+      event: "ride-started",
+      data: updatedRide,
+    });
+
+    return updatedRide;
+  } catch (err) {
+    console.error("Error while updating ride status", err);
+    throw new Error("Failed to update ride status");
+  }
 };

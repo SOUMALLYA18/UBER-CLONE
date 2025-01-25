@@ -9,6 +9,8 @@ const getDistanceTimeSchema = require("../utils/schemas/getDistanceTimeSchemas")
 const { sendMessageToSocketId } = require("../Socket");
 const rideModel = require("../models/rideModel");
 const { confirmRideSchema } = require("../utils/schemas/confirmRideSchema");
+const { startRideSchema } = require("../utils/schemas/startRideSchema");
+
 module.exports.createRide = async (req, res, next) => {
   const { errors, value: validatedData } = validateRequest(
     rideValidationSchema,
@@ -112,16 +114,23 @@ module.exports.confirmRide = async (req, res, next) => {
   const { error } = confirmRideSchema.validate(req.body);
 
   if (error) {
+    console.error("Validation Error:", error.details[0].message);
     return res.status(400).json({ error: error.details[0].message });
   }
 
   const { rideId } = req.body;
 
   try {
+    console.log("Captain data from request:", req.captain);
+
+    console.log("Ride ID:", rideId);
+
     const ride = await rideService.confirmRide({
       rideId,
-      captain: req.captain, // Ensure req.captain is set correctly
+      captain: req.captain,
     });
+
+    console.log("Ride after confirmation:", ride);
 
     sendMessageToSocketId(ride.user.socketId, {
       event: "ride-confirmed",
@@ -130,7 +139,41 @@ module.exports.confirmRide = async (req, res, next) => {
 
     return res.status(200).json(ride);
   } catch (err) {
-    console.error(err); // Log the actual error object
+    console.error("Error in confirmRide:", err);
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+module.exports.startRide = async (req, res, next) => {
+  const { error } = startRideSchema.validate(req.query);
+  console.log("Received query params:", req.query);
+
+  if (error) {
+    console.error("Validation Error:", error.details[0].message);
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+  const { rideId, otp } = req.query;
+
+  console.log("Received rideId:", rideId, "Received OTP:", otp);
+
+  try {
+    const ride = await rideService.startRide({
+      rideId,
+      otp,
+      captain: req.captain,
+    });
+
+    console.log("Ride started:", ride);
+
+    sendMessageToSocketId(ride.user.socketId, {
+      event: "ride-started",
+      data: ride,
+    });
+
+    return res.status(200).json(ride);
+  } catch (err) {
+    console.error("Error in startRide:", err); // Log the error for debugging purposes
     return res.status(500).json({ message: err.message });
   }
 };

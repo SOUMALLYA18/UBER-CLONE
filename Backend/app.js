@@ -26,5 +26,6 @@ app.use("/captains", captainRoutes);
 app.use("/maps", mapsRoutes);
 app.use("/rides", rideRoutes);
 app.use("/confirm-ride", rideRoutes);
+app.use("/start-ride", rideRoutes);
 
 module.exports = app;

@@ -81,7 +81,7 @@ const CaptainHome = () => {
     const response = await axios.post(
       `${import.meta.env.VITE_BASE_URL}/rides/confirm-ride`,
       {
-        rideId: ride._id, // Only send rideId
+        rideId: ride._id,
       },
       {
         headers: {
@@ -160,6 +160,7 @@ const CaptainHome = () => {
         className="fixed w-full h-screen z-10 bottom-0 translate-y-full bg-white px-3 py-10 pt-12"
       >
         <ConfirmRidePopUp
+          ride={ride}
           setConfirmRidePopupPanel={setConfirmRidePopupPanel}
           setRidePopupPanel={setRidePopupPanel}
         />

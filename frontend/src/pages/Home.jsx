@@ -11,6 +11,7 @@ import LookingForDriver from "../components/LookingForDriver";
 import WaitingForDriver from "../components/WaitingForDriver";
 import { SocketContext } from "../context/SocketContext";
 import { userDataContext } from "../context/UserContext";
+import { useNavigate } from "react-router-dom";
 const Home = () => {
   const [pickup, setPickup] = useState("");
   const [destination, setDestination] = useState("");
@@ -33,6 +34,7 @@ const Home = () => {
   const [fare, setFare] = useState({});
   const [vehicleType, setVehicleType] = useState(null);
   const [ride, setRide] = useState(null);
+  const navigate = useNavigate();
 
   const { socket } = useContext(SocketContext);
   const { user } = useContext(userDataContext);
@@ -40,7 +42,30 @@ const Home = () => {
     socket.emit("join", { userType: "user", userId: user._id });
   }, [user]);
 
-  socket.on("ride-confirmed", (ride) => setWaitingForDriver(true));
+  useEffect(() => {
+    const handleRideConfirmed = (ride) => {
+      setveichleFound(false);
+      setWaitingForDriver(true);
+      setRide(ride);
+    };
+
+    socket.on("ride-confirmed", handleRideConfirmed);
+
+    return () => {
+      socket.off("ride-confirmed", handleRideConfirmed);
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    const handleRideStarted = (ride) => {
+      console.log("Ride started event received:", ride);
+      setWaitingForDriver(false);
+      navigate("/riding");
+    };
+
+    socket.on("ride-started", handleRideStarted);
+  }, [socket, navigate]);
+
   const submithandler = (e) => {
     e.preventDefault();
   };
@@ -219,7 +244,7 @@ const Home = () => {
       });
     }
   }, [veichleFound]);
-  
+
   useGSAP(
     function () {
       if (waitingForDriver) {
