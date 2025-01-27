@@ -12,7 +12,13 @@ const rideRoutes = require("./routes/rideRoutes");
 const connectToDB = require("./db/db");
 connectToDB();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000", 
+    methods: "GET,POST",
+    credentials: true, 
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
