@@ -127,11 +127,12 @@ module.exports.confirmRide = async ({ rideId, captain }) => {
 
   try {
     // Update the ride with the captain's ID and set the status to "accepted"
+
     const ride = await rideModel.findOneAndUpdate(
       { _id: rideId },
       {
         status: "accepted",
-        captain: captain._id,
+        captain: captain,
       },
       { new: true }
     );
@@ -152,6 +153,7 @@ module.exports.confirmRide = async ({ rideId, captain }) => {
       console.error("Failed to populate the ride");
       throw new Error("Failed to populate the ride");
     }
+    
 
     return populatedRide;
   } catch (error) {
@@ -161,7 +163,7 @@ module.exports.confirmRide = async ({ rideId, captain }) => {
 };
 
 module.exports.startRide = async ({ rideId, otp, captain }) => {
-  console.log("Received parameters: rideId =", rideId, "otp =", otp);
+  
 
   if (!rideId || !otp) {
     throw new Error("Ride ID and OTP are required");
@@ -173,11 +175,12 @@ module.exports.startRide = async ({ rideId, otp, captain }) => {
     .populate("captain", "socketId")
     .select("+otp");
 
+
   if (!ride) {
     throw new Error("Ride not found");
   }
 
-  console.log("Ride found:", ride);
+ 
 
   if (ride.status !== "accepted") {
     throw new Error("Ride not accepted");
@@ -188,18 +191,22 @@ module.exports.startRide = async ({ rideId, otp, captain }) => {
   }
 
   try {
-    const updatedRide = await rideModel.findOneAndUpdate(
-      { _id: rideId },
-      { status: "ongoing", captain: captain },
-      { new: true }
-    );
+    
 
-    console.log("Updated ride:", updatedRide);
+    const updatedRide = await rideModel
+      .findOneAndUpdate(
+        { _id: rideId },
+        { status: "ongoing", captain: captain._id }, // Use captain._id here
+        { new: true }
+      )
+      .populate("captain");
+
+   
 
     // Log and verify socketId before sending the message
     const userSocketId = ride.user?.socketId;
 
-    console.log("User socketId:", userSocketId);
+   
 
     if (!userSocketId) {
       console.error("User socketId is missing!");
@@ -217,4 +224,35 @@ module.exports.startRide = async ({ rideId, otp, captain }) => {
     console.error("Error while updating ride status", err);
     throw new Error("Failed to update ride status");
   }
+};
+
+module.exports.endRide = async ({ rideId, captain }) => {
+  if (!rideId) {
+    throw new Error("Ride ID is required");
+  }
+  const ride = await rideModel
+    .findOne({
+      _id: rideId,
+      captain: captain._id,
+    })
+    .populate("user")
+    .populate("captain")
+    .select("+otp");
+
+  if (!ride) {
+    throw new Error("Ride not found");
+  }
+
+  if (ride.status !== "ongoing") {
+    throw new Error("Ride not ongoing");
+  }
+  await rideModel.findOneAndUpdate(
+    {
+      _id: rideId,
+    },
+    {
+      status: "completed",
+    }
+  );
+  return ride;
 };

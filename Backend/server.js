@@ -4,6 +4,9 @@ const port = process.env.PORT || 3000;
 const { initializeSocket } = require("./Socket");
 const server = http.createServer(app);
 initializeSocket(server);
-server.listen(port, () => {
+
+if (process.env.NODE_ENV !== "production") {
   console.log(`Server is running on port ${port}`);
-});
+}
+
+server.listen(port);

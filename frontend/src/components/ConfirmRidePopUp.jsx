@@ -5,9 +5,6 @@ import axios from "axios";
 const ConfirmRidePopUp = (props) => {
   const [otp, setOTP] = useState("");
   const navigate = useNavigate();
-  useEffect(() => {
-    console.log("Props.ride in ConfirmRidePopUp:", props.ride);
-  }, [props.ride]);
 
   const submithandler = async (e) => {
     e.preventDefault();
@@ -17,36 +14,44 @@ const ConfirmRidePopUp = (props) => {
       return;
     }
 
-    const rideId = props.ride?._id;
-    console.log("rideId:", rideId, "otp:", otp);
-
-    const url = `${import.meta.env.VITE_BASE_URL}/rides/start-ride`;
-    console.log("Request URL:", url);
-
-    const token = localStorage.getItem("token");
-    console.log("Token:", token);
-
     try {
-      const response = await axios.get(url, {
-        params: {
-          rideId,
-          otp: otp,
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      console.log(response.data);
+      const response = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/rides/start-ride`,
+        {
+          params: {
+            rideId: props.ride?._id,
+            otp: otp,
+          },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
       if (response.status === 200) {
+        // Close the popup panels
         props.setConfirmRidePopupPanel(false);
         props.setRidePopupPanel(false);
-        navigate("/captain-riding");
+
+        // Navigate to the next page with state
+        navigate("/captain-riding", { state: { ride: props.ride } });
+      } else {
+        console.error("Unexpected status code:", response.status);
+        alert("Failed to start the ride. Please try again.");
       }
     } catch (error) {
-      console.error("Error during request:", error);
-      alert("An error occurred while starting the ride.");
+      console.error("Error during the ride start process:", error);
+
+      // Provide a detailed error message for the user
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        alert(error.response.data.message);
+      } else {
+        alert("An error occurred while starting the ride. Please try again.");
+      }
     }
   };
 

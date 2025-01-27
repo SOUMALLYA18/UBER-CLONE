@@ -10,7 +10,8 @@ const { sendMessageToSocketId } = require("../Socket");
 const rideModel = require("../models/rideModel");
 const { confirmRideSchema } = require("../utils/schemas/confirmRideSchema");
 const { startRideSchema } = require("../utils/schemas/startRideSchema");
-
+const endRideSchema = require("../utils/schemas/endRideSchema");
+const endrideSchema = require("../utils/schemas/endRideSchema");
 module.exports.createRide = async (req, res, next) => {
   const { errors, value: validatedData } = validateRequest(
     rideValidationSchema,
@@ -43,7 +44,7 @@ module.exports.createRide = async (req, res, next) => {
       lng,
       10
     );
-    console.log(captainInRadius);
+
     ride.otp = "";
     captainInRadius.map((captain) =>
       sendMessageToSocketId(captain.socketId, {
@@ -51,7 +52,7 @@ module.exports.createRide = async (req, res, next) => {
         data: rideWithUser,
       })
     );
-    // Now send the response
+
     res.status(201).json({ message: "Ride created successfully", ride });
   } catch (error) {
     res
@@ -121,16 +122,10 @@ module.exports.confirmRide = async (req, res, next) => {
   const { rideId } = req.body;
 
   try {
-    console.log("Captain data from request:", req.captain);
-
-    console.log("Ride ID:", rideId);
-
     const ride = await rideService.confirmRide({
       rideId,
       captain: req.captain,
     });
-
-    console.log("Ride after confirmation:", ride);
 
     sendMessageToSocketId(ride.user.socketId, {
       event: "ride-confirmed",
@@ -146,7 +141,6 @@ module.exports.confirmRide = async (req, res, next) => {
 
 module.exports.startRide = async (req, res, next) => {
   const { error } = startRideSchema.validate(req.query);
-  console.log("Received query params:", req.query);
 
   if (error) {
     console.error("Validation Error:", error.details[0].message);
@@ -155,16 +149,12 @@ module.exports.startRide = async (req, res, next) => {
 
   const { rideId, otp } = req.query;
 
-  console.log("Received rideId:", rideId, "Received OTP:", otp);
-
   try {
     const ride = await rideService.startRide({
       rideId,
       otp,
       captain: req.captain,
     });
-
-    console.log("Ride started:", ride);
 
     sendMessageToSocketId(ride.user.socketId, {
       event: "ride-started",
@@ -174,6 +164,32 @@ module.exports.startRide = async (req, res, next) => {
     return res.status(200).json(ride);
   } catch (err) {
     console.error("Error in startRide:", err); // Log the error for debugging purposes
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+module.exports.endRide = async (req, res, next) => {
+  const { error } = endrideSchema.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+  try {
+    const { rideId } = req.body;
+
+    const ride = await rideService.endRide({ rideId, captain: req.captain });
+
+    if (ride?.user?.socketId) {
+      sendMessageToSocketId(ride?.user.socketId, {
+        event: "ride-ended",
+        data: ride,
+      });
+    }
+
+    return res.status(200).json(ride);
+  } catch (err) {
+    console.error("Error in endRide:", err); // Debugging error
     return res.status(500).json({ message: err.message });
   }
 };

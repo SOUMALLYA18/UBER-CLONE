@@ -42,8 +42,6 @@ const CaptainSignup = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
 
-    console.log("Form submitted"); // Add this to check if the handler is being called
-
     if (!validateInputs()) {
       return;
     }
@@ -60,22 +58,16 @@ const CaptainSignup = () => {
         color: vehicleColor,
       };
 
-      console.log("Submitting data to server:", captainData); // Log before API request
-
       const response = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/captains/register`,
         captainData
       );
 
-      console.log("Server response:", response.data); // Log response
-
       if (response.status === 201) {
         const data = response.data;
-        console.log("Data received:", data); // Log the data you receive
+
         setCaptain(data.captain);
 
-        console.log(setCaptain);
-        console.log("setCaptain called with:", data.captain);
         localStorage.setItem("token", data.token);
         navigate("/captain-home");
       }

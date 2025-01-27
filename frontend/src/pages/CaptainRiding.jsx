@@ -1,12 +1,16 @@
 import React, { useRef, useState } from "react";
 import uberLogo from "../../public/images/uber-driver.svg";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import FinishRide from "../components/Finishride";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import LiveTracking from "../components/LiveTracking";
 const CaptainRiding = (props) => {
   const [finishRidePanel, setFinishRidePanel] = useState(false);
   const finishRidePanelRef = useRef(null);
+  const location = useLocation();
+  const rideData = location.state?.ride;
+
   useGSAP(
     function () {
       if (finishRidePanel) {
@@ -33,11 +37,7 @@ const CaptainRiding = (props) => {
         </Link>
       </div>
       <div className="h-4/5">
-        <img
-          className="h-full w-full object-cover"
-          src="https://miro.medium.com/v2/resize:fit:1400/0*gwMx05pqII5hbfmX.gif"
-          alt=""
-        />
+        <LiveTracking />
       </div>
       <div className="h-1/5 p-6 flex items-center justify-between bg-[#ffeb3b]">
         <h4 className="text-xl font-semibold w-full">4 Km Away</h4>
@@ -54,7 +54,7 @@ const CaptainRiding = (props) => {
         ref={finishRidePanelRef}
         className="fixed w-full h-screen z-10 bottom-0  bg-white px-3 py-10 pt-12"
       >
-        <FinishRide setFinishRidePanel={setFinishRidePanel} />
+        <FinishRide ride={rideData} setFinishRidePanel={setFinishRidePanel} />
       </div>
     </div>
   );

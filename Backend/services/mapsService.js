@@ -9,9 +9,6 @@ module.exports.getAddressCoordinate = async (address) => {
   try {
     const response = await axios.get(url);
 
-    // Log the full response from the Google Maps API
-    console.log("Google Maps API Response:", response.data);
-
     if (response.data.status === "OK") {
       const location = response.data.results[0].geometry.location;
       return {

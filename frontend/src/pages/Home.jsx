@@ -12,6 +12,8 @@ import WaitingForDriver from "../components/WaitingForDriver";
 import { SocketContext } from "../context/SocketContext";
 import { userDataContext } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
+import LiveTracking from "../components/LiveTracking";
+
 const Home = () => {
   const [pickup, setPickup] = useState("");
   const [destination, setDestination] = useState("");
@@ -58,9 +60,8 @@ const Home = () => {
 
   useEffect(() => {
     const handleRideStarted = (ride) => {
-      console.log("Ride started event received:", ride);
       setWaitingForDriver(false);
-      navigate("/riding");
+      navigate("/riding", { state: { ride } });
     };
 
     socket.on("ride-started", handleRideStarted);
@@ -267,11 +268,12 @@ const Home = () => {
         alt="uber-logo"
       />
       <div className="h-screen w-screen ">
-        <img
+        {/* <img
           className="absolute inset-0 w-full h-full object-cover"
           src="https://miro.medium.com/v2/resize:fit:1400/0*gwMx05pqII5hbfmX.gif"
           alt="Background Animation"
-        />
+        /> */}
+        <LiveTracking />
       </div>
       <div className=" h-screen absolute top-0 w-full flex flex-col justify-end  ">
         <div className="h-[30%] bg-white p-5  relative">
