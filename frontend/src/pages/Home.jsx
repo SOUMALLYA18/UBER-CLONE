@@ -168,8 +168,6 @@ const Home = () => {
           },
         }
       );
-
-      console.log("Ride created successfully:", response.data); // Handle successful response
     } catch (error) {
       console.error(
         "Error creating ride:",
@@ -261,18 +259,13 @@ const Home = () => {
     [waitingForDriver]
   );
   return (
-    <div className="relative h-screen w-screen overflow-hidden ">
+    <div className="relative h-screen w-screen overflow-hidden bg-slate-400 ">
       <img
         className="w-16 absolute left-5 top-5 "
         src={uberLogo}
         alt="uber-logo"
       />
       <div className="h-screen w-screen ">
-        {/* <img
-          className="absolute inset-0 w-full h-full object-cover"
-          src="https://miro.medium.com/v2/resize:fit:1400/0*gwMx05pqII5hbfmX.gif"
-          alt="Background Animation"
-        /> */}
         <LiveTracking />
       </div>
       <div className=" h-screen absolute top-0 w-full flex flex-col justify-end  ">
